@@ -1,0 +1,12 @@
+{
+  "name": "70veces7-backend",
+  "version": "1.0.0",
+  "description": "Backend para 70 Veces 7 - Control Financiero",
+  "main": "api/sync.js",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "@vercel/kv": "^0.2.1"
+  }
+}
