@@ -8,18 +8,18 @@ const corsHeaders = {
 };
 
 export default async function handler(req, res) {
-  // CORS preflight
-  if (req.method === 'OPTIONS') {
-    return res.status(200).json(corsHeaders);
-  }
-
-  // Headers de respuesta
+  // Headers de respuesta (ahora van antes del preflight)
   res.setHeader('Content-Type', 'application/json');
   Object.entries(corsHeaders).forEach(([key, value]) => {
     res.setHeader(key, value);
   });
 
-  const { action, userId, pin, data, tipo } = req.body;
+  // CORS preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).json({ ok: true });
+  }
+
+  const { action, userId, pin, data, tipo } = req.body || {};
 
   if (!userId || !pin) {
     return res.status(400).json({ error: 'userId y pin requeridos' });
@@ -33,10 +33,10 @@ export default async function handler(req, res) {
       if (!tipo || !data) {
         return res.status(400).json({ error: 'tipo y data requeridos' });
       }
-      
+
       const fullKey = `${userKey}:${tipo}`;
       await kv.set(fullKey, data);
-      
+
       return res.status(200).json({
         success: true,
         message: `${tipo} sincronizado`,
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
     if (action === 'status') {
       // Check si el usuario tiene datos en el servidor
       const keys = await kv.keys(`${userKey}:*`);
-      
+
       return res.status(200).json({
         success: true,
         tieneSync: keys.length > 0,
@@ -92,9 +92,9 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('Error:', error);
-    return res.status(500).json({ 
+    return res.status(500).json({
       error: 'Error en el servidor',
-      message: error.message 
+      message: error.message
     });
   }
 }
